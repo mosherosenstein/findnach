@@ -1,0 +1,24 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Pasuk {
+  id                Int      @id @default(autoincrement())
+  book              String
+  book_order        Int
+  chapter           Int
+  verse             Int
+  hebrew_text       String
+  hebrew_text_plain String?
+  embedding         Unsupported("vector")?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  @@unique([book, chapter, verse])
+  @@index([book_order, chapter, verse])
+}
