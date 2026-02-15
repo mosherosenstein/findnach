@@ -44,6 +44,9 @@ export function SearchForm() {
       setError(err instanceof Error ? err.message : 'Unknown error');
       setResults([]);
       setMessage(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+      setResults([]);
     } finally {
       setLoading(false);
     }
@@ -136,6 +139,12 @@ export function SearchForm() {
             {showScores && typeof result.similarity === 'number' && (
               <p className="mb-2 text-xs text-slate-500">Similarity: {result.similarity.toFixed(3)}</p>
             )}
+        {results.length === 0 && !error && <p className="text-slate-600">No results yet. Run a search above.</p>}
+        {results.map((result) => (
+          <article key={`${result.book}-${result.chapter}-${result.verse}`} className="rounded-lg border bg-white p-4 shadow-sm">
+            <h3 className="mb-2 text-sm font-semibold text-slate-700">
+              {result.book} {result.chapter}:{result.verse}
+            </h3>
             <p dir="rtl" lang="he" className="text-right text-xl leading-8 text-slate-900">
               {result.hebrew_text}
             </p>

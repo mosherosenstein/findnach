@@ -15,6 +15,7 @@ MVP web app for semantic search over Hebrew-only Tanach pesukim (Torah + Nevi'im
 - `GET /api/search?q=...&book=...&limit=...`
 - Query can be Hebrew or English
 - Returns matching pesukim with: `book`, `chapter`, `verse`, `hebrew_text`, `similarity` (score is useful for debugging)
+- Returns only matching pesukim: `book`, `chapter`, `verse`, `hebrew_text`
 - Optional filter by book
 - No translations, no commentary, no AI explanations
 

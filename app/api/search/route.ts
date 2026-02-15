@@ -54,6 +54,11 @@ export async function GET(request: NextRequest) {
       WHERE embedding IS NOT NULL
         AND (${book ?? null}::text IS NULL OR book = ${book ?? null})
         AND (1 - (embedding <=> ${vectorLiteral}::vector)) >= ${minSimilarity}
+    const rows = await prisma.$queryRaw<SearchRow[]>`
+      SELECT book, chapter, verse, hebrew_text
+      FROM "Pasuk"
+      WHERE embedding IS NOT NULL
+        AND (${book ?? null}::text IS NULL OR book = ${book ?? null})
       ORDER BY embedding <=> ${vectorLiteral}::vector
       LIMIT ${limit};
     `;
