@@ -8,6 +8,7 @@ type SearchResult = {
   chapter: number;
   verse: number;
   hebrew_text: string;
+  similarity?: number;
 };
 
 export function SearchForm() {
@@ -17,11 +18,14 @@ export function SearchForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [message, setMessage] = useState<string | null>(null);
+  const [showScores, setShowScores] = useState(false);
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setMessage(null);
 
     try {
       const params = new URLSearchParams({ q, limit: String(limit) });
@@ -35,6 +39,11 @@ export function SearchForm() {
       }
 
       setResults(data.results ?? []);
+      setMessage(data.message ?? null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+      setResults([]);
+      setMessage(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
       setResults([]);
@@ -104,12 +113,32 @@ export function SearchForm() {
             </button>
           </div>
         </div>
+
+        <label className="inline-flex items-center gap-2 text-sm text-slate-600">
+          <input
+            type="checkbox"
+            checked={showScores}
+            onChange={(e) => setShowScores(e.target.checked)}
+            className="h-4 w-4 rounded border-slate-300"
+          />
+          Show scores
+        </label>
       </form>
 
       {error && <p className="rounded-md border border-red-200 bg-red-50 p-3 text-red-700">{error}</p>}
 
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Results ({results.length})</h2>
+        {message && <p className="text-sm text-slate-500">{message}</p>}
+        {results.length === 0 && !error && !message && <p className="text-slate-600">No results yet. Run a search above.</p>}
+        {results.map((result) => (
+          <article key={`${result.book}-${result.chapter}-${result.verse}`} className="rounded-lg border bg-white p-4 shadow-sm">
+            <h3 className="mb-1 text-sm font-semibold text-slate-700">
+              {result.book} {result.chapter}:{result.verse}
+            </h3>
+            {showScores && typeof result.similarity === 'number' && (
+              <p className="mb-2 text-xs text-slate-500">Similarity: {result.similarity.toFixed(3)}</p>
+            )}
         {results.length === 0 && !error && <p className="text-slate-600">No results yet. Run a search above.</p>}
         {results.map((result) => (
           <article key={`${result.book}-${result.chapter}-${result.verse}`} className="rounded-lg border bg-white p-4 shadow-sm">

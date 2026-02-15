@@ -14,6 +14,7 @@ MVP web app for semantic search over Hebrew-only Tanach pesukim (Torah + Nevi'im
 
 - `GET /api/search?q=...&book=...&limit=...`
 - Query can be Hebrew or English
+- Returns matching pesukim with: `book`, `chapter`, `verse`, `hebrew_text`, `similarity` (score is useful for debugging)
 - Returns only matching pesukim: `book`, `chapter`, `verse`, `hebrew_text`
 - Optional filter by book
 - No translations, no commentary, no AI explanations
@@ -83,6 +84,17 @@ npm run embed
 ```
 
 `embed` is resumable: it only embeds rows where `embedding IS NULL`. You can resume from an ID with `START_AFTER_ID`.
+
+
+## Similarity threshold
+
+Search results are filtered by `MIN_SIMILARITY` (default `0.78`). Any pasuk below this score is excluded.
+
+- Suggested tuning range: `0.72` to `0.85`
+- Lower values increase recall (more results, broader matches)
+- Higher values increase precision (fewer, stricter matches)
+
+If no pesukim pass the threshold, the API returns an empty list with the message: `"No strong matches found."`.
 
 ## Embedding model and dimensions
 

@@ -12,4 +12,5 @@ export const env = {
   openaiApiKey: process.env.OPENAI_API_KEY,
   embeddingModel,
   embeddingDimensions,
+  minSimilarity: Number(process.env.MIN_SIMILARITY ?? 0.78),
 };

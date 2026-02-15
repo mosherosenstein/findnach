@@ -15,6 +15,7 @@ type SearchRow = {
   chapter: number;
   verse: number;
   hebrew_text: string;
+  similarity: number;
 };
 
 export async function GET(request: NextRequest) {
@@ -40,6 +41,19 @@ export async function GET(request: NextRequest) {
 
     const vectorLiteral = `[${queryEmbedding.join(',')}]`;
 
+    const minSimilarity = Number.isFinite(env.minSimilarity) ? Math.min(Math.max(env.minSimilarity, 0), 1) : 0.78;
+
+    const rows = await prisma.$queryRaw<SearchRow[]>`
+      SELECT
+        book,
+        chapter,
+        verse,
+        hebrew_text,
+        (1 - (embedding <=> ${vectorLiteral}::vector))::float8 AS similarity
+      FROM "Pasuk"
+      WHERE embedding IS NOT NULL
+        AND (${book ?? null}::text IS NULL OR book = ${book ?? null})
+        AND (1 - (embedding <=> ${vectorLiteral}::vector)) >= ${minSimilarity}
     const rows = await prisma.$queryRaw<SearchRow[]>`
       SELECT book, chapter, verse, hebrew_text
       FROM "Pasuk"
@@ -48,6 +62,10 @@ export async function GET(request: NextRequest) {
       ORDER BY embedding <=> ${vectorLiteral}::vector
       LIMIT ${limit};
     `;
+
+    if (rows.length === 0) {
+      return NextResponse.json({ results: [], message: 'No strong matches found.' });
+    }
 
     return NextResponse.json({ results: rows });
   } catch (error) {
